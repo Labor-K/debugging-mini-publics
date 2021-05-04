@@ -1,0 +1,190 @@
+<meta charset="utf-8" />
+<title>SMUS Global Network</title>
+<meta
+  name="viewport"
+  content="initial-scale=1,maximum-scale=1,user-scalable=no"
+/>
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+<link
+  href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+  rel="stylesheet"
+/>
+
+<body>
+  <div id="debug">DEBUGGING MINI PUBLICS</div>
+  <div id="map"></div>
+
+  <style>
+
+    #debug{
+      position: fixed;
+      background: white;
+      z-index: 999999;
+    }
+    .ergebnis {
+      font-size: 2rem;
+      font-family: sans-serif;
+      padding: 2rem 0 2rem 2rem;
+      color: white;
+    }
+
+    .toggle {
+      margin: 0 0 0 2rem;
+      position: relative;
+      display: inline-block;
+      width: 6rem;
+      height: 3.4rem;
+    }
+
+    .toggle input {
+      display: none;
+    }
+
+    .roundbutton {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      background-color: #33455e;
+      display: block;
+      transition: all 0.3s;
+      border-radius: 3.4rem;
+      cursor: pointer;
+    }
+
+    .roundbutton:before {
+      position: absolute;
+      content: "";
+      height: 2.4rem;
+      width: 2.5rem;
+      border-radius: 100%;
+      display: block;
+      left: 0.5rem;
+      bottom: 0.5rem;
+      background-color: white;
+      transition: all 0.3s;
+    }
+
+    input:checked + .roundbutton {
+      background-color: #ff6e48;
+    }
+
+    input:checked + .roundbutton:before {
+      transform: translate(2.6rem, 0);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Helvetica Neue", Helvetica, Arial, Sans-serif;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .mapboxgl-popup-content {
+      background: white !important;
+    }
+
+    h1 {
+      font-size: 20px;
+      line-height: 30px;
+      color: orange;
+    }
+
+    h2 {
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #71c42d;
+    }
+
+    #console {
+      position: absolute;
+      width: 240px;
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: rgba(250, 249, 249, 0.822);
+    }
+  </style>
+
+  <script>
+    mapboxgl.accessToken =
+      "pk.eyJ1IjoicmNvZW5lbi1rbGFiIiwiYSI6ImNrZHk4NWtraDRna3QyenJvZWN3ZWUweHEifQ.3UTo-_da7VgRSkMVfHEgFg";
+
+    var map = new mapboxgl.Map({
+      container: "map", // container element id
+      style: "mapbox://styles/rcoenen-klab/cko9pm4fy38dh17qu6qyuslhn",
+      center: [0.6067323746758468, 24.333391733137177], // initial map center in [lon, lat]
+      zoom: 2,
+    });
+
+    map.on("load", function () {
+      map.addLayer({
+        id: "smuspoints",
+        type: "circle",
+        source: {
+          type: "geojson",
+          data:
+            "https://raw.githubusercontent.com/Labor-K/mini-publics/master/map_c.geojson",
+        }
+
+        ///geojson -> speicher alle namen aus dem key university in einem array
+        /// loop durch den array
+        /// 1 -> blau , 2 -> grün
+      });
+     
+
+      //layer ein und ausblenden -> Mapbox Example finden
+
+      document.getElementById("clickMe").onclick = myFilter;
+      //document.getElementById("newid").onclick = myNewFilter;
+    });
+
+    // Create a popup, but don't add it to the map yet.
+    map.on("click", "smuspoints", function (e) {
+      let coordinates = e.features[0].geometry.coordinates.slice();
+      var unsereUniversitätsBeschreibung = e.features[0].properties.country; // popup für Beschreibung
+      var unsereStrasse = e.features[0].properties.city;
+      var unserAnderesDing = e.features[0].properties.localisation;
+      var unsereID= e.features[0].properties.ID;
+
+      var otherdesc = e.features[0].properties.issue;
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(
+          "<b>" +
+            unsereUniversitätsBeschreibung +
+            "</b></br>" +
+            unsereStrasse +
+            "</br>" +
+            unserAnderesDing + "</br>"+
+            "ID= " +unsereID
+        ) // popup für beschreibung
+        .addTo(map);
+    });
+
+    //CURSOR STYLE
+    map.on("mouseenter", "smuspoints", function () {
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    map.on("mouseleave", "smuspoints", function () {
+      map.getCanvas().style.cursor = "";
+    });
+  </script>
+</body>
